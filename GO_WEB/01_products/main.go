@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/renzobalbo/goWeb/dia1/E2.2/global"
+	"github.com/taveracamila/GO WEB/01_products/handlers"
 	"github.com/renzobalbo/goWeb/dia1/E2.2/handlers"
 )
 
