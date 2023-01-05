@@ -8,8 +8,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/taveracamila/GO WEB/01_products/handlers"
-	"github.com/renzobalbo/goWeb/dia1/E2.2/handlers"
+	"github.com/taveracamila/Bootcamp/GO_WEB/01_products/handlers"
+	"github.com/taveracamila/Bootcamp/GO_WEB/01_products/productos"
 )
 
 
@@ -35,6 +35,7 @@ func main(){
 	router.GET("/products/:id", handlers.GetProductById)
 	router.GET("/products/search", handlers.GetProductsPriceGt)
 
+	router.Run(":2020")
 
 
 
@@ -52,7 +53,7 @@ func cargarJSON(path string) (err error){
 	if err != nil {
 		return
 	}
-	json.Unmarshal(obj, &Products)
+	json.Unmarshal(obj, &product.Products)
 	return
 }
 

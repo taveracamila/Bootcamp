@@ -6,6 +6,8 @@ import (
 
 
 	"github.com/gin-gonic/gin"
+	"github.com/taveracamila/Bootcamp/GO_WEB/01_products/productos"
+
 )
 
 
@@ -64,6 +66,7 @@ func GetProductById(c *gin.Context) {
 
 func GetProductsPriceGt(ctx *gin.Context) {
 	priceQuery, err := strconv.Atoi(ctx.Query("price"))
+	
 	if err != nil {
 		ctx.JSON(404, gin.H{
 			"message": "NO SE ENCONTRARON PRODUCTOS",
