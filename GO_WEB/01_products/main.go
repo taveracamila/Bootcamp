@@ -6,6 +6,8 @@ import (
 	"os"
 	"strconv"
 	"github.com/gin-gonic/gin"
+	"errors"
+	"time"
 
 )
 
@@ -23,6 +25,7 @@ type Product struct {
 
 
 var Products []Product
+var LastId int
 
 
 
@@ -46,6 +49,8 @@ func main(){
 	router.GET("/products", ListarProductos)
 	router.GET("/products/:id", GetProductById)
 	router.GET("/products/search", GetProductsPriceGt)
+	router.POST("/products", AgregarProduct)
+
 
 	router.Run(":2020")
 
@@ -66,8 +71,16 @@ func cargarJSON(path string) (err error){
 		return
 	}
 	json.Unmarshal(obj, &Products)
+	SetLastId()
 	return
 }
+
+
+//cargo LastId
+func SetLastId(){
+	prod:=Products[len(Products)-1]
+	LastId=prod.Id
+} 
 
 
 
@@ -146,4 +159,83 @@ func GetProductsPriceGt(ctx *gin.Context) {
 	})
 }
 
+
+
+func AgregarProduct(c *gin.Context) {
+	var req Product 
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+	}
+
+	if err := verificarCodeValue(req.CodeValue); err != nil {
+		c.JSON(http.StatusConflict, gin.H{
+			"error": "Error al verificar code value",
+		})
+		return
+	}
+
+	if err := verificarFecha(req.Expiration); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Error al verificar la fecha ",
+		})
+		return
+	}
+
+	if err := verificarVacios(req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Error verificando vacios",
+		})
+		return
+	}
+
+	LastId++
+	req.Id = LastId
+	Products = append(Products, req)
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Created",
+		"data":    req,
+	})
+}
+
+
+
+
+
+
+func verificarCodeValue(code string) error {
+	for _, item := range Products {
+		if item.CodeValue == code {
+			return errors.New("CodeValue existente")
+		}
+	}
+	return nil
+}
+
+func verificarFecha(date string) error {
+	format := "02/01/2006"
+	_, err := time.Parse(format, date)
+	return err
+}
+
+func verificarVacios(prod Product) error {
+	if prod.Price == 0 {
+		return errors.New("Price vacio")}
+	if prod.Name == "" {
+		return errors.New("Name vacio")
+	}
+	if prod.Expiration == "" {
+		return errors.New("Expiration vacio")
+	}
+	if prod.CodeValue == "" {
+		return errors.New("CodeValue  vacio")
+	}
+	if prod.Quantity == 0 {
+		return errors.New("Quantity vacio")
+	}
+	return nil
+}
 
