@@ -9,46 +9,65 @@ var (
 	ErrAlreadyExist = errors.New("already exist")
 )
 
+type IService interface {
+	GetAll() []domain.Product
+	GetProductById(id int) (p domain.Product, err error )
+	GetProductsPriceGt(precio int ) [] domain.Product
+	Create(p domain.Product)
+	Update(id int, name string, quantity int, codeValue string, isPublished bool, expiration string, price float64) (domain.Product, error)
+}
+
+type Service struct {
+	r Repository
+}
+
+func NewService(repo Repository) *Service {
+	return &Service{repo}
+}
 
 
 
-func CreateProduct(p domain.Product) error {
+func (s *Service) Create(p domain.Product) error {
 
 
-	if err := ExisteCodeValue(p.CodeValue); err != nil {
+	if err := s.r.ExisteCodeValue(p.CodeValue); err != nil {
 		return err
 	}
 
+	
 
-	AgregarProduct(p)
+
+
+	s.r.Create(p)
 	return nil
 
 	
 }
 
-func GuardarJSON(productos [] domain.Product){
-	for _, item := range productos {
-		AgregarProduct(item)
-	}
+
+
+
+func (s *Service) GetAll() [] domain.Product{
+	return s.r.GetAll()
 }
 
-
-func GetProducts() [] domain.Product{
-	return GetAll()
-}
-
-func GetProductById(id int) (domain.Product, error){
-	return GetProduct(id)
+func (s *Service) GetProductById(id int) (domain.Product, error){
+	return s.r.GetProductById(id)
 }
 
 
 
-func GetProductsPriceGt(price int) [] domain.Product{
+func (s *Service) GetProductsPriceGt(price int) [] domain.Product{
 
 
-	return GetProductsByPriceGt(price)
+	return s.r.GetProductsPriceGt(price)
 
 
+}
+
+
+func (s *Service) Update(id int, name string, quantity int, codeValue string, isPublished bool, expiration string, price float64) (domain.Product, error) {
+	return s.r.Update(id, name, quantity, codeValue, isPublished, expiration, price)
 }
 
 

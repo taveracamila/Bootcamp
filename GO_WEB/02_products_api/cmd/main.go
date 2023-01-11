@@ -13,10 +13,16 @@ import (
 
 func main(){
 
-	err := cargarJSON("./products.json")
+
+	var products []domain.Product
+	err := cargarJSON("./products.json", &products)
 	if err != nil {
 		panic(err)
 	}
+
+	repo := product.NewRepository(products)
+	service := product.NewService(repo)
+	ph := handlers.NewProductHandler(*service)
 
 	router := gin.Default()
 	/*
@@ -26,10 +32,28 @@ func main(){
 	router.GET("/products/search", GetProductsPriceGt)
 
 	*/
-	router.POST("/products", handlers.AgregarProduct)
-	router.GET("/products", handlers.GetAll)
-	router.GET("/products/:id", handlers.GetProductById)
-	router.GET("/products/search", handlers.GetProductsPriceGt)
+
+	pr := router.Group("/products")
+	{
+		pr.POST("", ph.Create())
+		pr.GET("", ph.GetAll())
+		pr.GET("/:id", ph.GetProductById())
+		pr.GET("/search", ph.GetProductsPriceGt())
+		pr.PUT("/:id", ph.Update())
+
+
+	
+	}
+
+	/*
+	router.POST("/products", ph.Create())
+	router.GET("/products", ph.GetAll())
+	router.GET("/products/:id", ph.GetProductById())
+	router.GET("/products/search", ph.GetProductsPriceGt())
+	products.PUT("/:id", ph.Update())
+
+	*/
+
 
 
 
@@ -40,19 +64,12 @@ func main(){
 
 
 
-func cargarJSON(path string) (err error){
+func cargarJSON(path string, list *[]domain.Product) (err error){
 
 	obj, err := os.ReadFile(path)
 	if err != nil {
 		return
 	}
-
-	var aux [] domain.Product
-
-	json.Unmarshal(obj, &aux)
-
-
-	product.GuardarJSON(aux)
-
-	return
+	json.Unmarshal(obj, &list)
+ 	return
 }

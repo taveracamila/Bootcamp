@@ -14,43 +14,66 @@ import (
 )
 
 
+
+
+
+type productHandler struct {
+	server product.Service
+}
+
+
+func NewProductHandler(s product.Service) *productHandler {
+	return &productHandler{
+		server: s,
+	}
+}
+
+
 // recibe peticiones del front 
 // valida params
 
 
 
-func AgregarProduct(c *gin.Context) {
-	var req domain.Product 
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+
+func (ph *productHandler) Create() gin.HandlerFunc {
+
+	return func(c *gin.Context){
+
+		var req domain.Product 
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err,
+			})
+		}
+
+		
+
+		if err := verificarFecha(req.Expiration); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Error al verificar la fecha ",
+			})
+			return
+		}
+
+		if err := verificarVacios(req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Error verificando vacios",
+			})
+			return
+		}
+
+
+		ph.server.Create(req)
+
+		c.JSON(http.StatusCreated, gin.H{
+			"message": "Created",
+			"data":    req,
 		})
-	}
 
+	}
 	
-
-	if err := verificarFecha(req.Expiration); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Error al verificar la fecha ",
-		})
-		return
-	}
-
-	if err := verificarVacios(req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Error verificando vacios",
-		})
-		return
-	}
-
-
-	product.CreateProduct(req)
-
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "Created",
-		"data":    req,
-	})
 }
 
 
@@ -82,29 +105,33 @@ func verificarVacios(prod domain.Product) error {
 
 
 //Crear una ruta /products que nos devuelva la lista de todos los productos en la slice.
-func GetAll(c *gin.Context) {
-	data:=product.GetAll()
-	c.JSON(http.StatusOK, gin.H{"message": "Listado de productos", "data": data})
+func (ph *productHandler) GetAll() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		data:=ph.server.GetAll()
+		c.JSON(http.StatusOK, gin.H{"message": "Listado de productos", "data": data})
+	}
 }
 
 
-func GetProductById(c *gin.Context) {
+func (ph *productHandler) GetProductById() gin.HandlerFunc {
+	return func(c *gin.Context) {
 	// request
-	id, err := strconv.Atoi(c.Param("id"))
+		id, err := strconv.Atoi(c.Param("id"))
 
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "ERROR ", "data": nil})
-		return
-	}
-
-
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "ERROR ", "data": nil})
+			return
+		}
 
 
-	response, err_func:=product.GetProductById(id)
-	if err_func == nil {
-		c.JSON(http.StatusOK, gin.H{"message": "PRODUCTO ENCONTRADO", "data": response})
-	} else {
-		c.JSON(http.StatusOK, gin.H{"message": "NO SE ENCONTRO EL PRODUCTO", "data": nil})
+
+
+		response, err_func:=ph.server.GetProductById(id)
+		if err_func == nil {
+			c.JSON(http.StatusOK, gin.H{"message": "PRODUCTO ENCONTRADO", "data": response})
+		} else {
+			c.JSON(http.StatusOK, gin.H{"message": "NO SE ENCONTRO EL PRODUCTO", "data": nil})
+		}
 	}
 }
 
@@ -113,27 +140,80 @@ func GetProductById(c *gin.Context) {
 // Crear una ruta /products/search que nos permita buscar por parámetro los productos 
 // cuyo precio sean mayor a un valor priceGt.
 
-func GetProductsPriceGt(ctx *gin.Context) {
-	priceQuery, err := strconv.Atoi(ctx.Query("price"))
+func (ph *productHandler) GetProductsPriceGt() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		priceQuery, err := strconv.Atoi(c.Query("price"))
 
-	if err != nil {
-		ctx.JSON(404, gin.H{
-			"message": "NO SE ENCONTRARON PRODUCTOS",
-			"data":    nil,
+		if err != nil {
+			c.JSON(404, gin.H{
+				"message": "NO SE ENCONTRARON PRODUCTOS",
+				"data":    nil,
+			})
+			return
+		}
+
+		response:=ph.server.GetProductsPriceGt(priceQuery)
+
+		c.JSON(200, gin.H{
+			"message": "PRODUCTOS ENCONTRADOS:",
+			"data":    response,
 		})
-		return
 	}
-
-	response:=product.GetProductsPriceGt(priceQuery)
-
-	ctx.JSON(200, gin.H{
-		"message": "PRODUCTOS ENCONTRADOS:",
-		"data":    response,
-	})
 }
 
 
 
+
+
+//nuevo
+
+
+func (ph *productHandler) Update() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		var req domain.Product 
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err,
+			})
+		}
+
+		
+
+		if err := verificarFecha(req.Expiration); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Error al verificar la fecha ",
+			})
+			return
+		}
+
+		if err := verificarVacios(req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Error verificando vacios",
+			})
+			return
+		}
+
+
+		response,err:=ph.server.Update(req.Id, req.Name,req.Quantity, req.CodeValue, req.IsPublished, req.Expiration, req.Price )
+
+		if err!=nil{
+			c.JSON(http.StatusOK, gin.H{
+				"message": "Updated",
+				"data":    response,
+			})
+
+		}else{
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Not found",
+				"data":    nil,
+			})
+		}
+	}
+	
+	
+}
 
 
 
