@@ -14,7 +14,12 @@ type IService interface {
 	GetProductById(id int) (p domain.Product, err error )
 	GetProductsPriceGt(precio int ) [] domain.Product
 	Create(p domain.Product)
+	
 	Update(id int, name string, quantity int, codeValue string, isPublished bool, expiration string, price float64) (domain.Product, error)
+	UpdatePrice(id int, price float64) (domain.Product, error)
+	Delete(id int) error
+
+
 }
 
 type Service struct {
@@ -70,4 +75,12 @@ func (s *Service) Update(id int, name string, quantity int, codeValue string, is
 	return s.r.Update(id, name, quantity, codeValue, isPublished, expiration, price)
 }
 
+
+func (s *Service) UpdatePrice(id int, price float64) (domain.Product, error) {
+	return s.r.UpdatePrice(id, price)
+}
+
+func (s *Service) Delete(id int) error {
+	return s.r.Delete(id)
+}
 

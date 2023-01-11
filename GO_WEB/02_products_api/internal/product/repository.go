@@ -15,6 +15,9 @@ type Repository interface {
 	Create(p domain.Product)
 	ExisteCodeValue(code string) error
 	Update(id int, name string, quantity int, codeValue string, isPublished bool, expiration string, price float64) (p domain.Product, err error)
+	UpdatePrice(id int, price float64) (p domain.Product, err error)
+	Delete(id int) error
+
 }
 	
 
@@ -96,6 +99,9 @@ func (r *repository) GetProductsPriceGt(precio int ) [] domain.Product{
 
 
 
+
+
+
 func (r *repository) Update(id int, name string, quantity int, codeValue string, isPublished bool, expiration string, price float64) (p domain.Product, err error) {
 	
 	//p := domain.Product{Id:id, Name: name, Quantity: quantity, CodeValue: codeValue, IsPublished: isPublished, Expiration: expiration, Price: price}
@@ -129,42 +135,49 @@ func (r *repository) Update(id int, name string, quantity int, codeValue string,
 }
 
 
-/*
-// updatePrice actualiza el precio de un producto
-func (r *repository) UpdatePrice(id int, price float64) (domain.Product, error) {
-	var p domain.Product
-	updated := false
-	for i := range r.list {
-		if r.list[i].Id == id {
-			r.list[i].Price = price
-			updated = true
-			p = r.list[i]
+func (r *repository) UpdatePrice(id int, price float64) (p domain.Product, err error) {
+	
+	var flag bool
+
+
+	for _, prod := range r.products {
+
+		if prod.Id == id{
+			prod.Price=price
+			p=prod
+			flag=true
+			break
 		}
 	}
-	if !updated {
-		return domain.Product{}, fmt.Errorf("couldn't find a product with the id: %d", id)
+
+
+	
+	if !flag {
+		err = errors.New("No se encontro producto con el id mencionado")
 	}
-	return p, nil
+
+	return p, err
 }
 
 func (r *repository) Delete(id int) error {
-	deleted := false
+	
+	var flag bool
 	var index int
-	for i := range r.list {
-		if r.list[i].Id == id {
+
+	for i := range r.products {
+		if r.products[i].Id == id {
 			index = i
-			deleted = true
+			flag = true
 		}
 	}
-	if !deleted {
-		return fmt.Errorf("couldn't find a product with the id: %d", id)
+
+	if !flag {
+		return errors.New("No se encontro producto con ese id")
 	}
-	r.list = append(r.list[:index], r.list[index+1:]...)
+
+	r.products = append(r.products[:index], r.products[index+1:]...)
 	return nil
 }
-
-*/
-
 
 
 

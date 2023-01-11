@@ -40,6 +40,8 @@ func main(){
 		pr.GET("/:id", ph.GetProductById())
 		pr.GET("/search", ph.GetProductsPriceGt())
 		pr.PUT("/:id", ph.Update())
+		pr.PATCH("/:id", ph.UpdatePrice())
+		pr.DELETE("/:id", ph.Delete())
 
 
 	

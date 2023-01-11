@@ -218,6 +218,63 @@ func (ph *productHandler) Update() gin.HandlerFunc {
 
 
 
+func (ph *productHandler) UpdatePrice() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+
+		if err != nil {
+			c.JSON(400, gin.H{
+				"error": "El id no es valido",
+			})
+			return
+		}
+
+		var req domain.Product
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(400, gin.H{"error": err})
+			return
+		}
+
+
+		if req.Price <=0 {
+			c.JSON(400, gin.H{"error": "Precio ingresado incorrecto"})
+			return
+		}
+		p, err := ph.server.UpdatePrice(int(id), req.Price)
+		if err != nil {
+			c.JSON(404, gin.H{"error": err})
+			return
+		}
+		c.JSON(200, p)
+	}
+}
+
+func (ph *productHandler) Delete() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+
+		if err != nil {
+			c.JSON(400, gin.H{"error": "Id invalido"})
+			return
+		}
+		err = ph.server.Delete(int(id))
+		if err != nil {
+			c.JSON(404, gin.H{
+				"message": "NO se encontro producto para borrar",
+				"data":    nil,
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Deleted",
+			"data":    nil,
+		})	}
+}
+
+
+
+
 
 
 
