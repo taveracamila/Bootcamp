@@ -40,13 +40,6 @@ func (ph *productHandler) Create() gin.HandlerFunc {
 
 	return func(c *gin.Context){
 
-
-		token := c.GetHeader("token")
-		if token != os.Getenv("TOKEN") {
-			c.JSON(401, gin.H{"error": "invalid token"})
-			return
-		}
-
 		var req domain.Product 
 
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -172,18 +165,11 @@ func (ph *productHandler) GetProductsPriceGt() gin.HandlerFunc {
 
 
 
-//nuevo ---  con token
+//nuevo
 
 
 func (ph *productHandler) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
-
-		token := c.GetHeader("token")
-		if token != os.Getenv("TOKEN") {
-			c.JSON(401, gin.H{"error": "invalid token"})
-			return
-		}
 
 		var req domain.Product 
 
@@ -234,15 +220,6 @@ func (ph *productHandler) Update() gin.HandlerFunc {
 
 func (ph *productHandler) UpdatePrice() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
-
-		token := c.GetHeader("token")
-		if token != os.Getenv("TOKEN") {
-			c.JSON(401, gin.H{"error": "invalid token"})
-			return
-		}
-
-
 		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 
 		if err != nil {
@@ -274,12 +251,6 @@ func (ph *productHandler) UpdatePrice() gin.HandlerFunc {
 
 func (ph *productHandler) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
-		token := c.GetHeader("token")
-		if token != os.Getenv("TOKEN") {
-			c.JSON(401, gin.H{"error": "invalid token"})
-			return
-		}
 		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 
 		if err != nil {

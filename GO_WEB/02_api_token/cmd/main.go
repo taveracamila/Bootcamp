@@ -65,7 +65,7 @@ func main(){
 }
 
 
-/*
+
 func cargarJSON(path string, list *[]domain.Product) (err error){
 
 	obj, err := os.ReadFile(path)
@@ -75,5 +75,3 @@ func cargarJSON(path string, list *[]domain.Product) (err error){
 	json.Unmarshal(obj, &list)
  	return
 }
-
-*/
