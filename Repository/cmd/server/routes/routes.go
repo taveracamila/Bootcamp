@@ -40,6 +40,7 @@ func (r *router) buildProductsRoutes() {
 	{
 		routerProduct.GET("/", productHandler.GetAll())
 		routerProduct.GET("/:id", productHandler.Get())
+		routerProduct.POST("/", productHandler.Create())
 
 	
 	}

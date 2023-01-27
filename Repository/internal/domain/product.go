@@ -8,6 +8,6 @@ type Product struct {
 	Quantity    int       `json:"quantity"`
 	CodeValue   string    `json:"code_value"`
 	IsPublished bool      `json:"is_published"`
-	Expiration  time.Time `json:"expiration"`
+	// Expiration  time.Time `json:"expiration" time_format:"2006-01-02" time_utc:"1"`
 	Price       float64   `json:"price"`
 }
